@@ -34,7 +34,7 @@
 +	    socket_cliente = socket(AF_INET, SOCK_STREAM, 0);
 +	    if (socket_cliente < 0)
 +	        error("ERROR de apertura de socket");
-+	    server = gethostbyname(argv[1]);
++	    server = gethostbyname(argv[1]); 
 +	    if (server == NULL)
 +	    {
 +	        fprintf(stderr,"ERROR, no hay host \n");

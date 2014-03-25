@@ -1,0 +1,62 @@
++	
++	// Archivo para la computadora cliente
++	
++	//Inclusión de directivas de preprocesador
++	
++	#include <stdio.h>
++	#include <stdlib.h>
++	#include <unistd.h>
++	#include <string.h>
++	#include <sys/types.h>
++	#include <sys/socket.h>
++	#include <netinet/in.h>
++	#include <netdb.h>
++	
++	void error(const char *mensaje) //permite dar un mensaje en caso de error, según como
++					//corresponda
++	{
++		printf("%s", mensaje);
++		exit(0);
++	}
++	
++	int main(int argc, char *argv[])
++	{
++	    int socket_cliente, puerto, valor;
++	    struct sockaddr_in serv_addr;
++	    struct hostent *server;
++	    char buffer_memoria[256];
++	    if (argc < 3) //puerto mayor a 3 para que no genere error
++	    {
++	        fprintf(stderr,"El puerto numero %s está en uso\n", argv[0]);
++	        exit(0);
++	    }
++	    puerto = atoi(argv[2]);
++	    socket_cliente = socket(AF_INET, SOCK_STREAM, 0);
++	    if (socket_cliente < 0)
++	        error("ERROR de apertura de socket");
++	    server = gethostbyname(argv[1]);
++	    if (server == NULL)
++	    {
++	        fprintf(stderr,"ERROR, no hay host \n");
++	        exit(0);
++	    }
++	    bzero((char *) &serv_addr, sizeof(serv_addr));
++	    serv_addr.sin_family = AF_INET;
++	    bcopy((char *)server->h_addr,(char*)&serv_addr.sin_addr.s_addr,server->h_length);
++	    serv_addr.sin_port = htons(puerto);
++	    if (connect(socket_cliente,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0)
++	        error("ERROR de conexión");
++	    printf("Por favor, introduzca el mensaje:");
++	    bzero(buffer_memoria,256);
++	    fgets(buffer_memoria,255,stdin);
++	    valor = write(socket_cliente,buffer_memoria,strlen(buffer_memoria));
++	    if (valor < 0)
++	        error("ERROR al escribir en socket");
++	    bzero(buffer_memoria,256);
++	    valor = read(socket_cliente,buffer_memoria,255);
++	    if (valor < 0)
++	        error("ERROR al leer del socket");
++	    printf("%s\n",buffer_memoria);
++	    close(socket_cliente);
++	    return 0;
++	}
